@@ -67,10 +67,10 @@
                             <div class="d-flex justify-space-between align-center">
                                 <div>
                                     <MudText Typo="Typo.h4" Class="font-weight-bold">@currentWeather.City, @currentWeather.Country</MudText>
-                                    <MudText Typo="Typo.body1" Color="Color.TextSecondary">@currentWeather.Description</MudText>
+                                    <MudText Typo="Typo.body1" Color="Color.Inherit">@currentWeather.Description</MudText>
                                 </div>
                                 <div class="weather-icon-large">
-                                    <img src="https://openweathermap.org/img/wn/@currentWeather.Icon@2x.png" alt="@currentWeather.Description" />
+                                    <img src="https://openweathermap.org/img/wn/@currentWeather.Icon@("2x").png" alt="@currentWeather.Description" />
                                 </div>
                             </div>
 
@@ -80,7 +80,7 @@
                                 <MudItem xs="12" sm="6" md="3">
                                     <MudPaper Class="temperature-card pa-4" Elevation="0">
                                         <MudStack Spacing="1">
-                                            <MudText Typo="Typo.body2" Color="Color.TextSecondary">Temperature</MudText>
+                                            <MudText Typo="Typo.body2" Color="Color.Inherit">Temperature</MudText>
                                             <MudText Typo="Typo.h4" Class="font-weight-bold">@currentWeather.Temperature°C</MudText>
                                             <MudText Typo="Typo.caption">Feels: @currentWeather.FeelsLike°C</MudText>
                                         </MudStack>
@@ -123,28 +123,28 @@
                             <MudGrid Spacing="2">
                                 <MudItem xs="12" sm="6" md="3">
                                     <MudStack Spacing="1">
-                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">UV Index</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Inherit">UV Index</MudText>
                                         <MudText Typo="Typo.h6" Class="font-weight-bold">@currentWeather.UVIndex</MudText>
                                     </MudStack>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="3">
                                     <MudStack Spacing="1">
-                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Cloudiness</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Inherit">Cloudiness</MudText>
                                         <MudText Typo="Typo.h6" Class="font-weight-bold">@currentWeather.Cloudiness%</MudText>
                                     </MudStack>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="3">
                                     <MudStack Spacing="1">
-                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Visibility</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Inherit">Visibility</MudText>
                                         <MudText Typo="Typo.h6" Class="font-weight-bold">@(currentWeather.Visibility / 1000m) km</MudText>
                                     </MudStack>
                                 </MudItem>
 
                                 <MudItem xs="12" sm="6" md="3">
                                     <MudStack Spacing="1">
-                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Coordinates</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Inherit">Coordinates</MudText>
                                         <MudText Typo="Typo.caption">@currentWeather.Latitude.ToString("F2"), @currentWeather.Longitude.ToString("F2")</MudText>
                                     </MudStack>
                                 </MudItem>
@@ -257,11 +257,11 @@
                                                 <MudStack Spacing="2" AlignItems="AlignItems.Center">
                                                     <MudText Typo="Typo.body2" Class="font-weight-bold">@day.Date.ToString("ddd")</MudText>
                                                     <MudText Typo="Typo.caption">@day.Date.ToString("M/d")</MudText>
-                                                    <img src="https://openweathermap.org/img/wn/@day.Icon@2x.png" alt="@day.Description" style="width: 50px; height: 50px;" />
+                                                    <img src="https://openweathermap.org/img/wn/@day.Icon@("2x").png" alt="@day.Description" style="width: 50px; height: 50px;" />
                                                     <MudText Typo="Typo.caption" Class="text-center">@day.Description</MudText>
                                                     <div class="d-flex gap-2">
                                                         <MudText Typo="Typo.h6" Class="font-weight-bold">@day.MaxTemp°</MudText>
-                                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">@day.MinTemp°</MudText>
+                                                        <MudText Typo="Typo.body2" Color="Color.Inherit">@day.MinTemp°</MudText>
                                                     </div>
                                                     <MudStack Spacing="0" Style="font-size: 12px;">
                                                         <div class="d-flex justify-space-between">
@@ -288,9 +288,9 @@
                 <MudCard Elevation="2">
                     <MudCardContent>
                         <MudStack Spacing="3" AlignItems="AlignItems.Center" Class="py-12">
-                            <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Large" Color="Color.TextSecondary" />
-                            <MudText Typo="Typo.h6" Color="Color.TextSecondary">Search for a city to get started</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.TextSecondary">Enter a city name or use your current location</MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Large" Color="Color.Inherit" />
+                            <MudText Typo="Typo.h6" Color="Color.Inherit">Search for a city to get started</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Inherit">Enter a city name or use your current location</MudText>
                         </MudStack>
                     </MudCardContent>
                 </MudCard>
