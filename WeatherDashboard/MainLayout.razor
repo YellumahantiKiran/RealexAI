@@ -1,0 +1,31 @@
+@inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="mud-layout">
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudStack Row="true" Spacing="3" AlignItems="AlignItems.Center">
+            <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Large" />
+            <MudText Typo="Typo.h5" Class="font-weight-bold">Weather Dashboard</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Inherit" Edge="Edge.End" />
+        </MudStack>
+    </MudAppBar>
+
+    <MudMainContent Class="px-4 pt-4">
+        <div class="weather-container">
+            @Body
+        </div>
+    </MudMainContent>
+
+    <MudAppBar Bottom="true" Color="Color.Dark" Elevation="1">
+        <MudStack Row="true" Spacing="2" Style="width: 100%;">
+            <MudText Typo="Typo.caption" Class="ml-2">© 2026 Weather Dashboard | Data from OpenWeatherMap API</MudText>
+            <MudSpacer />
+            <MudText Typo="Typo.caption" Class="mr-2">Last updated: @DateTime.Now.ToString("HH:mm:ss")</MudText>
+        </MudStack>
+    </MudAppBar>
+</div>

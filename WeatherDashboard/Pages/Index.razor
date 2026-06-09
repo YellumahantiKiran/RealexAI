@@ -1,0 +1,404 @@
+@page "/"
+@using MudBlazor
+@inject IWeatherService WeatherService
+@inject IGeocodingService GeocodingService
+@inject ILocationService LocationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Weather Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-8">
+    <!-- Search Section -->
+    <MudGrid Class="mb-6">
+        <MudItem xs="12">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudAutoComplete 
+                            @bind-Value="searchCity" 
+                            SearchFunc="SearchCities"
+                            Label="Search for a city"
+                            FullWidth="true"
+                            Placeholder="e.g., London, New York, Tokyo"
+                            Variant="Variant.Outlined"
+                            ShowProgressIndicator="isSearching"
+                        />
+                        <MudButton 
+                            Variant="Variant.Filled" 
+                            Color="Color.Primary" 
+                            OnClick="FetchWeather"
+                            Disabled="string.IsNullOrEmpty(searchCity) || isLoading"
+                            Size="Size.Large"
+                            StartIcon="@Icons.Material.Filled.Search"
+                        >
+                            @if (isLoading)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                <MudText>Search</MudText>
+                            }
+                        </MudButton>
+                        <MudButton 
+                            Variant="Variant.Outlined" 
+                            Color="Color.Info" 
+                            OnClick="GetCurrentLocation"
+                            Disabled="isLoading"
+                            Size="Size.Large"
+                            StartIcon="@Icons.Material.Filled.MyLocation"
+                        >
+                            Current Location
+                        </MudButton>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Current Weather -->
+    @if (currentWeather != null)
+    {
+        <MudGrid Class="mb-6">
+            <MudItem xs="12" md="8">
+                <MudCard Elevation="3" Class="current-weather-card">
+                    <MudCardContent>
+                        <MudStack Spacing="2">
+                            <div class="d-flex justify-space-between align-center">
+                                <div>
+                                    <MudText Typo="Typo.h4" Class="font-weight-bold">@currentWeather.City, @currentWeather.Country</MudText>
+                                    <MudText Typo="Typo.body1" Color="Color.TextSecondary">@currentWeather.Description</MudText>
+                                </div>
+                                <div class="weather-icon-large">
+                                    <img src="https://openweathermap.org/img/wn/@currentWeather.Icon@2x.png" alt="@currentWeather.Description" />
+                                </div>
+                            </div>
+
+                            <MudDivider Class="my-2" />
+
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudPaper Class="temperature-card pa-4" Elevation="0">
+                                        <MudStack Spacing="1">
+                                            <MudText Typo="Typo.body2" Color="Color.TextSecondary">Temperature</MudText>
+                                            <MudText Typo="Typo.h4" Class="font-weight-bold">@currentWeather.Temperature°C</MudText>
+                                            <MudText Typo="Typo.caption">Feels: @currentWeather.FeelsLike°C</MudText>
+                                        </MudStack>
+                                    </MudPaper>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudPaper Class="pa-4" Elevation="0" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <MudStack Spacing="1">
+                                            <MudText Typo="Typo.body2" Color="Color.Info">Humidity</MudText>
+                                            <MudText Typo="Typo.h4" Class="font-weight-bold" Color="Color.Info">@currentWeather.Humidity%</MudText>
+                                            <MudLinearProgressEx Value="@currentWeather.Humidity" Color="Color.Info" />
+                                        </MudStack>
+                                    </MudPaper>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudPaper Class="pa-4" Elevation="0" Style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                        <MudStack Spacing="1">
+                                            <MudText Typo="Typo.body2" Color="Color.Surface">Wind Speed</MudText>
+                                            <MudText Typo="Typo.h4" Class="font-weight-bold" Color="Color.Surface">@currentWeather.WindSpeed m/s</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Surface">Direction: @currentWeather.WindDirection°</MudText>
+                                        </MudStack>
+                                    </MudPaper>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudPaper Class="pa-4" Elevation="0" Style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                        <MudStack Spacing="1">
+                                            <MudText Typo="Typo.body2" Color="Color.Surface">Pressure</MudText>
+                                            <MudText Typo="Typo.h4" Class="font-weight-bold" Color="Color.Surface">@currentWeather.Pressure hPa</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Surface">@(currentWeather.Pressure > 1013 ? "High" : "Low")</MudText>
+                                        </MudStack>
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudDivider Class="my-2" />
+
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudStack Spacing="1">
+                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">UV Index</MudText>
+                                        <MudText Typo="Typo.h6" Class="font-weight-bold">@currentWeather.UVIndex</MudText>
+                                    </MudStack>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudStack Spacing="1">
+                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Cloudiness</MudText>
+                                        <MudText Typo="Typo.h6" Class="font-weight-bold">@currentWeather.Cloudiness%</MudText>
+                                    </MudStack>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudStack Spacing="1">
+                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Visibility</MudText>
+                                        <MudText Typo="Typo.h6" Class="font-weight-bold">@(currentWeather.Visibility / 1000m) km</MudText>
+                                    </MudStack>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="3">
+                                    <MudStack Spacing="1">
+                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">Coordinates</MudText>
+                                        <MudText Typo="Typo.caption">@currentWeather.Latitude.ToString("F2"), @currentWeather.Longitude.ToString("F2")</MudText>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Sun Times & Air Quality -->
+            <MudItem xs="12" md="4">
+                <MudStack Spacing="2">
+                    <MudCard Elevation="2">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Sun Times</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="2">
+                                <div class="d-flex justify-space-between">
+                                    <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.WbSunny" Color="Color.Warning" />
+                                        <MudText Typo="Typo.caption">Sunrise</MudText>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@currentWeather.Sunrise.ToString("HH:mm")</MudText>
+                                </div>
+                                <MudDivider />
+                                <div class="d-flex justify-space-between">
+                                    <MudStack Spacing="0" AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Nightlight" Color="Color.Info" />
+                                        <MudText Typo="Typo.caption">Sunset</MudText>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@currentWeather.Sunset.ToString("HH:mm")</MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+
+                    <MudCard Elevation="2">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Additional Info</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="2">
+                                <div class="d-flex justify-space-between">
+                                    <MudText Typo="Typo.body2">Dew Point</MudText>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@currentWeather.DewPoint°C</MudText>
+                                </div>
+                                <div class="d-flex justify-space-between">
+                                    <MudText Typo="Typo.body2">Precipitation</MudText>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@currentWeather.Precipitation mm</MudText>
+                                </div>
+                                <div class="d-flex justify-space-between">
+                                    <MudText Typo="Typo.body2">Rain Probability</MudText>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@currentWeather.RainProbability%</MudText>
+                                </div>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Hourly Forecast -->
+        @if (hourlyForecast != null && hourlyForecast.Any())
+        {
+            <MudGrid Class="mb-6">
+                <MudItem xs="12">
+                    <MudCard Elevation="2">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Hourly Forecast (Next 24 Hours)</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="hourly-scroll">
+                                <MudStack Row="true" Spacing="2">
+                                    @foreach (var hour in hourlyForecast.Take(24))
+                                    {
+                                        <MudPaper Class="hourly-item pa-3" Elevation="0">
+                                            <MudStack Spacing="1" AlignItems="AlignItems.Center">
+                                                <MudText Typo="Typo.caption" Class="font-weight-bold">@hour.Time.ToString("HH:mm")</MudText>
+                                                <img src="https://openweathermap.org/img/wn/@hour.Icon.png" alt="@hour.Description" style="width: 40px; height: 40px;" />
+                                                <MudText Typo="Typo.body2" Class="font-weight-bold">@hour.Temperature°C</MudText>
+                                                <MudText Typo="Typo.caption">@hour.Humidity%</MudText>
+                                            </MudStack>
+                                        </MudPaper>
+                                    }
+                                </MudStack>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        }
+
+        <!-- 5-Day Forecast -->
+        @if (dailyForecast != null && dailyForecast.Any())
+        {
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudCard Elevation="2">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">5-Day Forecast</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudGrid Spacing="2">
+                                @foreach (var day in dailyForecast.Take(5))
+                                {
+                                    <MudItem xs="12" sm="6" md="2.4">
+                                        <MudCard Class="forecast-card" Elevation="0">
+                                            <MudCardContent>
+                                                <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@day.Date.ToString("ddd")</MudText>
+                                                    <MudText Typo="Typo.caption">@day.Date.ToString("M/d")</MudText>
+                                                    <img src="https://openweathermap.org/img/wn/@day.Icon@2x.png" alt="@day.Description" style="width: 50px; height: 50px;" />
+                                                    <MudText Typo="Typo.caption" Class="text-center">@day.Description</MudText>
+                                                    <div class="d-flex gap-2">
+                                                        <MudText Typo="Typo.h6" Class="font-weight-bold">@day.MaxTemp°</MudText>
+                                                        <MudText Typo="Typo.body2" Color="Color.TextSecondary">@day.MinTemp°</MudText>
+                                                    </div>
+                                                    <MudStack Spacing="0" Style="font-size: 12px;">
+                                                        <div class="d-flex justify-space-between">
+                                                            <span>💧 @day.Humidity%</span>
+                                                            <span>💨 @day.WindSpeed m/s</span>
+                                                        </div>
+                                                    </MudStack>
+                                                </MudStack>
+                                            </MudCardContent>
+                                        </MudCard>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        }
+    }
+    else if (!isLoading)
+    {
+        <MudGrid>
+            <MudItem xs="12">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <MudStack Spacing="3" AlignItems="AlignItems.Center" Class="py-12">
+                            <MudIcon Icon="@Icons.Material.Filled.Cloud" Size="Size.Large" Color="Color.TextSecondary" />
+                            <MudText Typo="Typo.h6" Color="Color.TextSecondary">Search for a city to get started</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.TextSecondary">Enter a city name or use your current location</MudText>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private string searchCity = "London";
+    private CurrentWeatherDto? currentWeather;
+    private List<HourlyForecastDto>? hourlyForecast;
+    private List<DailyForecastDto>? dailyForecast;
+    private bool isLoading = false;
+    private bool isSearching = false;
+    private List<string> cities = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchWeather();
+    }
+
+    private async Task FetchWeather()
+    {
+        if (string.IsNullOrEmpty(searchCity))
+            return;
+
+        isLoading = true;
+        try
+        {
+            // Get coordinates from city name
+            var coords = await GeocodingService.GetCoordinatesByCityAsync(searchCity);
+            if (coords == null)
+            {
+                Snackbar.Add($"City '{searchCity}' not found", Severity.Error);
+                isLoading = false;
+                return;
+            }
+
+            // Fetch current weather
+            currentWeather = await WeatherService.GetCurrentWeatherAsync(coords.Latitude, coords.Longitude);
+
+            // Fetch forecasts
+            hourlyForecast = await WeatherService.GetHourlyForecastAsync(coords.Latitude, coords.Longitude);
+            dailyForecast = await WeatherService.GetDailyForecastAsync(coords.Latitude, coords.Longitude);
+
+            if (currentWeather != null)
+            {
+                Snackbar.Add($"Weather data loaded for {currentWeather.City}", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<IEnumerable<string>> SearchCities(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Enumerable.Empty<string>();
+
+        isSearching = true;
+        try
+        {
+            var results = await GeocodingService.SearchCitiesAsync(value);
+            return results ?? Enumerable.Empty<string>();
+        }
+        finally
+        {
+            isSearching = false;
+        }
+    }
+
+    private async Task GetCurrentLocation()
+    {
+        isLoading = true;
+        try
+        {
+            var location = await LocationService.GetCurrentLocationAsync();
+            if (location != null)
+            {
+                currentWeather = await WeatherService.GetCurrentWeatherAsync(location.Latitude, location.Longitude);
+                hourlyForecast = await WeatherService.GetHourlyForecastAsync(location.Latitude, location.Longitude);
+                dailyForecast = await WeatherService.GetDailyForecastAsync(location.Latitude, location.Longitude);
+
+                if (currentWeather != null)
+                {
+                    searchCity = currentWeather.City;
+                    Snackbar.Add($"Location updated: {currentWeather.City}", Severity.Success);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Unable to get current location", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error getting location: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
